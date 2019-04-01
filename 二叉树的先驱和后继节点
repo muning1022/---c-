@@ -1,0 +1,142 @@
+#include <iostream>
+#include <stack>
+using namespace std;
+ 
+struct Node
+{
+	int   m_nValue;
+	Node* m_pLeft;
+	Node* m_pRight;
+	Node* m_pParent;
+};
+//寻找后继节点
+Node* most_leftnode(Node* node)
+{
+	while (node->m_pLeft != nullptr)
+		node = node->m_pLeft;
+	return node;
+}
+Node* find_the_next(Node* ptr)
+{
+	if (ptr == nullptr)
+		return ptr;
+//如果当前节点的右子树存在，则右子树上最左的节点是后继节点
+//否则，若其不为其父节点的左孩子，则向上移动当前节点和其父节点，直到当前节点是其父节点的左孩子
+	if (ptr->m_pRight != nullptr) 
+		return most_leftnode(ptr->m_pRight);
+ 
+	Node* parent = ptr->m_pParent;
+	while (parent != nullptr&&ptr != parent->m_pLeft)//&&前第一个条件是为了二叉树最右下角节点准备的
+	{
+		ptr = ptr->m_pParent;
+		parent = ptr->m_pParent;
+	}
+	return parent;
+}
+//寻找先驱节点
+Node* most_rightnode(Node* node)
+{
+	while (node->m_pRight != nullptr)
+		node = node->m_pRight;
+	return node;
+}
+Node* find_the_previous(Node* ptr)
+{
+	if (ptr == nullptr)
+		return ptr;
+	//如果当前节点的左子树存在，则左子树上最右的节点是先驱节点
+	//否则，若其不为其父节点的右孩子，则向上移动当前节点和其父节点，直到当前节点是其父节点的右孩子
+	if (ptr->m_pLeft != nullptr) {
+		return most_rightnode(ptr->m_pLeft);
+	}else{
+		Node* parent = ptr->m_pParent;
+		while (parent != nullptr&&ptr != parent->m_pRight)//&&前第一个条件是为了二叉树最左下角的节点准备的
+		{
+			ptr = ptr->m_pParent;
+			parent = ptr->m_pParent;
+		}
+		return parent;
+	}
+}
+ 
+//创建二叉树
+Node* create_node(int value)
+{
+	Node *new_node = new Node;
+	new_node->m_nValue = value;
+	new_node->m_pLeft = nullptr;
+	new_node->m_pRight= nullptr;
+	new_node->m_pParent = nullptr;
+	return new_node;
+}
+void ConnectTreeNodes(Node* pParent, Node* pLeft, Node* pRight)
+{
+	if (pParent != nullptr)
+	{
+		pParent->m_pLeft = pLeft;
+		pParent->m_pRight = pRight;
+ 
+		if (pLeft != nullptr)
+			pLeft->m_pParent = pParent;
+		if (pRight != nullptr)
+			pRight->m_pParent = pParent;
+	}
+}
+ 
+//中序遍历
+void in_oeder(Node*head)
+{
+	stack<Node*> stack;
+	if (head == nullptr)
+		return;
+	Node *ptr = head;
+	Node *tmp = nullptr;
+	while (!stack.empty() || ptr != nullptr)
+	{
+		if (ptr!= nullptr){//注意 判断时不可以拿ptr->next做判断！
+			stack.push(ptr);
+			ptr = ptr->m_pLeft;
+			
+		}else{
+			tmp = stack.top();
+			cout << tmp->m_nValue << endl;
+			stack.pop();
+			ptr = tmp->m_pRight;
+		}
+	}
+}
+ 
+int main()
+{
+	Node* head = create_node(18);
+	Node* pNode2 = create_node(26);
+	Node* pNode3 = create_node(30);
+	Node* pNode4 = create_node(57);
+	Node* pNode5 = create_node(78);
+	Node* pNode6 = create_node(19);
+	Node* pNode7 = create_node(31);
+ 
+	ConnectTreeNodes(head, pNode2, pNode3);
+	ConnectTreeNodes(pNode3, pNode4, pNode5);
+	ConnectTreeNodes(pNode5, pNode6, pNode7);
+ 
+	in_oeder(head);
+	Node *search = pNode5;
+	cout << "节点" << search->m_nValue << endl;
+ 
+	if (find_the_next(search) != nullptr) {
+		cout << "该节点的后继点是：" << find_the_next(search)->m_nValue << endl;
+	}else {
+		cout << "该节点的后继点是空：" << endl;
+	}
+ 
+	if (find_the_previous(search) != nullptr) {
+		cout << "该节点的先驱点是：" << find_the_previous(search)->m_nValue << endl;
+	}
+	else {
+		cout << "该节点的先驱点是空：" << endl;
+	}
+ 
+	system("pause");
+	return 0;
+}
